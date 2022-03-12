@@ -5,7 +5,6 @@ import com.opencsv.exceptions.CsvValidationException;
 import ru.agavrilova.istore.user.Buyer;
 import ru.agavrilova.istore.user.Seller;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +36,20 @@ public class Main {
         return x.matches(fioRegex);
     }
 
+    public static boolean isLogin(String x) {
+        String loginRegex = "[A-Za-z0-9_]+";
+        return x.matches(loginRegex);
+    }
+
+    public static boolean isPwd(String x) {
+        String pwdRegex = "[A-Za-z0-9_\\.\\^\\$\\*\\+\\?]{5,}";
+        return x.matches(pwdRegex);
+    }
+    public static boolean isPhoneNum(String x) {
+        String phoneRegex = "[0-9]{10,11}";
+        return x.matches(phoneRegex);
+    }
+
     public List<Buyer> loadBuyerFromCsv(String filePath) throws IOException, CsvValidationException {
         List<Buyer> result = new ArrayList<>();
         CSVReader reader = new CSVReader(new FileReader(filePath));
@@ -47,12 +60,21 @@ public class Main {
 
             try {
                 if (!isFIO(line[0])) {
-                    throw new Exception("Некорректные данные для покупателя: " + line[0]);
+                    throw new Exception("Некорректные ФИО у покупателя: " + line[0]);
+                }
+                if (!isLogin(line[1])) {
+                    throw new Exception("Некорректный логин: " + line[1] + " у покупателя: " + line[0]);
+                }
+                if (!isPwd(line[2])) {
+                    throw new Exception("Некорректный пароль у покупателя: " + line[0]);
+                }
+                if (!isPhoneNum(line[3])) {
+                    throw new Exception("Некорректный телефон: " + line[3] + " у покупателя: " + line[0]);
                 }
                 UUID id = UUID.randomUUID();
                 Buyer buyer = new Buyer(id.toString(), line[0], line[1], line[2], line[3]);
                 result.add(buyer);
-            } catch (Exception e){
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
 
